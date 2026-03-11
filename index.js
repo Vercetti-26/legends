@@ -12,21 +12,39 @@ async function makeCommit(date) {
     };
 
     await jsonfile.writeFile(FILE_PATH, data);
-
     await git.add([FILE_PATH]);
     await git.commit(date, { "--date": date });
 }
 
 async function run() {
-    for (let i = 0; i < 365; i++) {
-        const date = moment()
-            .subtract(i, "days")
-            .format();
 
-        await makeCommit(date);
+    const start = moment("2025-09-15");
+    const end = moment("2026-03-10");
+
+    let day = start.clone();
+
+    while (day.isSameOrBefore(end)) {
+
+        if (Math.random() < 0.5) {
+
+            const commits = Math.floor(Math.random() * 5) + 1;
+
+            for (let i = 0; i < commits; i++) {
+
+                const date = day.clone().add(i, "seconds").format();
+
+                await makeCommit(date);
+
+            }
+
+        }
+
+        day.add(1, "day");
     }
 
-    await git.push();
+    console.log("Finished generating commits. Pushing to GitHub...");
+    await git.push("origin", "main");
+    console.log("Push complete.");
 }
 
 run();
